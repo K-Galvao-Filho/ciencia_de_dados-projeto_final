@@ -28,7 +28,6 @@ TRADUCOES = {
     'Sleep_Hours_per_Night': 'Horas de Sono por Noite',
     'Preferred_Learning_Style': 'Estilo de Aprendizado Preferido',
     'Final_Grade': 'Nota Final',
-    # Traduções para opções de Preferred_Learning_Style
     'Auditory': 'Auditivo',
     'Kinesthetic': 'Cinesio',
     'Reading/Writing': 'Leitura/Escrita',
@@ -160,7 +159,7 @@ def gerar_visualizacoes(df_viz, caminho_salvar='graficos/'):
     print("Geração de visualizações concluída.")
 
 # Função para treinar e avaliar modelos
-def treinar_e_avaliar_modelos(X, y, caminho_salvar='graficos/'):
+def treinar_e_avaliar_modelos(X, y, mapeamento_grades, caminho_salvar='graficos/'):
     print("Iniciando treinamento e avaliação dos modelos...")
     # Verificar valores únicos de y
     unique_classes = np.unique(y)
@@ -228,8 +227,12 @@ def treinar_e_avaliar_modelos(X, y, caminho_salvar='graficos/'):
         # Visualizar matriz de confusão
         print(f"  Gerando matriz de confusão para {nome}...")
         plt.figure(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+        # Criar lista de rótulos na ordem correta (0=D, 1=C, 2=B, 3=A)
+        labels = [k for k, v in sorted(mapeamento_grades.items(), key=lambda x: x[1])]
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels)
         plt.title(f'Matriz de Confusão - {nome}')
+        plt.xlabel('Previsto')
+        plt.ylabel('Real')
         plt.savefig(f'{caminho_salvar}matriz_confusao_{nome.lower().replace(" ", "_")}.png')
         plt.close()
         print(f"  Matriz de confusão salva como 'matriz_confusao_{nome.lower().replace(' ', '_')}.png'.")
@@ -365,7 +368,7 @@ def main():
     print("Dados preparados.")
     
     # Treinar e avaliar modelos
-    resultados, X_train, X_test, y_train, y_test = treinar_e_avaliar_modelos(X, y)
+    resultados, X_train, X_test, y_train, y_test = treinar_e_avaliar_modelos(X, y, mapeamento_grades)
     
     # Teste de hipóteses
     print("Executando testes de hipóteses para comparar modelos...")

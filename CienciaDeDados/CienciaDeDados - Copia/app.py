@@ -171,8 +171,8 @@ def treinar_e_avaliar_modelos(X, y, mapeamento_grades, caminho_salvar='graficos/
     
     modelos = {
         'Random Forest': RandomForestClassifier(random_state=42),
-        'XGBoost': XGBClassifier(random_state=42, eval_metric='mlogloss', num_class=len(unique_classes)),
-        'SVM': SVC(probability=True, random_state=42)
+        'XGBoost': XGBClassifier(random_state=42, eval_metric='mlogloss', num_class=len(unique_classes))
+        #'SVM': SVC(probability=True, random_state=42)
     }
     
     # Definir rótulos para a matriz de confusão
