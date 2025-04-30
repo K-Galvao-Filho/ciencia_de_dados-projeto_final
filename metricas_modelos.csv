@@ -1,4 +1,0 @@
-Modelo,Acurácia,F1-Score,AUC,MAE,MSE,RMSE,CV Média,CV Desvio Padrão
-Random Forest,1.0,1.0,1.0,0.0,0.0,0.0,1.0,0.0
-XGBoost,1.0,1.0,1.0,0.0,0.0,0.0,1.0,0.0
-SVM,0.972,0.9719,0.9992,0.028,0.028,0.1673,0.9722,0.0028

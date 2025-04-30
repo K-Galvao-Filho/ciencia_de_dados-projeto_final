@@ -22,13 +22,11 @@ TRADUCOES = {
     'Study_Hours_per_Week': 'Horas de Estudo por Semana',
     'Online_Courses_Completed': 'Cursos Online Concluídos',
     'Assignment_Completion_Rate (%)': 'Taxa de Conclusão de Tarefas (%)',
-    'Exam_Score (%)': 'Pontuação em Exames (%)',
     'Attendance_Rate (%)': 'Taxa de Presença (%)',
     'Time_Spent_on_Social_Media (hours/week)': 'Tempo em Redes Sociais (horas/semana)',
     'Sleep_Hours_per_Night': 'Horas de Sono por Noite',
     'Preferred_Learning_Style': 'Estilo de Aprendizado Preferido',
     'Final_Grade': 'Nota Final',
-    # Traduções para opções de Preferred_Learning_Style
     'Auditory': 'Auditivo',
     'Kinesthetic': 'Cinesio',
     'Reading/Writing': 'Leitura/Escrita',
@@ -64,7 +62,7 @@ def carregar_e_preprocessar_dados(caminho_arquivo):
     # Normalizar variáveis numéricas
     print("  Normalizando variáveis numéricas...")
     colunas_numericas = ['Age', 'Study_Hours_per_Week', 'Online_Courses_Completed', 
-                         'Assignment_Completion_Rate (%)', 'Exam_Score (%)', 
+                         'Assignment_Completion_Rate (%)', 
                          'Attendance_Rate (%)', 'Time_Spent_on_Social_Media (hours/week)', 
                          'Sleep_Hours_per_Night']
     scaler = MinMaxScaler()
@@ -89,7 +87,7 @@ def gerar_visualizacoes(df_viz, caminho_salvar='graficos/'):
     
     # Lista de variáveis numéricas para histogramas
     colunas_numericas = ['Age', 'Study_Hours_per_Week', 'Online_Courses_Completed', 
-                         'Assignment_Completion_Rate (%)', 'Exam_Score (%)', 
+                         'Assignment_Completion_Rate (%)', 
                          'Attendance_Rate (%)', 'Time_Spent_on_Social_Media (hours/week)', 
                          'Sleep_Hours_per_Night']
     
@@ -102,9 +100,9 @@ def gerar_visualizacoes(df_viz, caminho_salvar='graficos/'):
         plt.xlabel(TRADUCOES[coluna])
         # Substituir caracteres inválidos no nome do arquivo (mantendo nome em inglês para consistência)
         nome_arquivo = coluna.replace(' (%)', '').replace(' (hours/week)', '').replace('/', '_').lower()
-        plt.savefig(f'{caminho_salvar}hist_{nome_arquivo}.png')
+        plt.savefig(f'{caminho_salvar}hist_{nome_arquivo}_refinado.png')
         plt.close()
-        print(f"  Histograma salvo como 'hist_{nome_arquivo}.png'.")
+        print(f"  Histograma salvo como 'hist_{nome_arquivo}_refinado.png'.")
     
     # Countplot de Preferred_Learning_Style por Final_Grade
     print(f"  Gerando countplot de {TRADUCOES['Preferred_Learning_Style']} por {TRADUCOES['Final_Grade']}...")
@@ -117,20 +115,9 @@ def gerar_visualizacoes(df_viz, caminho_salvar='graficos/'):
     plt.xlabel(TRADUCOES['Preferred_Learning_Style'])
     plt.ylabel('Contagem')
     plt.legend(title=TRADUCOES['Final_Grade'])
-    plt.savefig(f'{caminho_salvar}bar_learning_style.png')
+    plt.savefig(f'{caminho_salvar}bar_learning_style_refinado.png')
     plt.close()
-    print("  Countplot salvo como 'bar_learning_style.png'.")
-    
-    # Boxplot de Exam_Score por Final_Grade
-    print(f"  Gerando boxplot de {TRADUCOES['Exam_Score (%)']} por {TRADUCOES['Final_Grade']}...")
-    plt.figure(figsize=(10, 6))
-    sns.boxplot(x='Final_Grade', y='Exam_Score (%)', data=df_viz)
-    plt.title(f'{TRADUCOES["Exam_Score (%)"]} por {TRADUCOES["Final_Grade"]}')
-    plt.xlabel(TRADUCOES['Final_Grade'])
-    plt.ylabel(TRADUCOES['Exam_Score (%)'])
-    plt.savefig(f'{caminho_salvar}box_exam_score_grade.png')
-    plt.close()
-    print("  Boxplot salvo como 'box_exam_score_grade.png'.")
+    print("  Countplot salvo como 'bar_learning_style_refinado.png'.")
     
     # Heatmap de correlação
     print("  Gerando heatmap de correlação...")
@@ -139,21 +126,9 @@ def gerar_visualizacoes(df_viz, caminho_salvar='graficos/'):
     sns.heatmap(corr, annot=True, cmap='coolwarm', xticklabels=[TRADUCOES[col] for col in corr.columns], 
                 yticklabels=[TRADUCOES[col] for col in corr.columns])
     plt.title('Matriz de Correlação')
-    plt.savefig(f'{caminho_salvar}heatmap_corr.png')
+    plt.savefig(f'{caminho_salvar}heatmap_corr_refinado.png')
     plt.close()
-    print("  Heatmap salvo como 'heatmap_corr.png'.")
-    
-    # Gráfico de dispersão: Attendance_Rate vs Study_Hours_per_Week
-    print(f"  Gerando scatterplot de {TRADUCOES['Attendance_Rate (%)']} vs {TRADUCOES['Study_Hours_per_Week']}...")
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(x='Study_Hours_per_Week', y='Attendance_Rate (%)', hue='Final_Grade', data=df_viz)
-    plt.title(f'{TRADUCOES["Attendance_Rate (%)"]} vs. {TRADUCOES["Study_Hours_per_Week"]}')
-    plt.xlabel(TRADUCOES['Study_Hours_per_Week'])
-    plt.ylabel(TRADUCOES['Attendance_Rate (%)'])
-    plt.legend(title=TRADUCOES['Final_Grade'])
-    plt.savefig(f'{caminho_salvar}scatter_attendance_study_hours.png')
-    plt.close()
-    print("  Scatterplot salvo como 'scatter_attendance_study_hours.png'.")
+    print("  Heatmap salvo como 'heatmap_corr_refinado.png'.")
     
     # Fechar todas as figuras abertas para liberar memória
     plt.close('all')
@@ -171,14 +146,12 @@ def treinar_e_avaliar_modelos(X, y, mapeamento_grades, caminho_salvar='graficos/
     
     modelos = {
         'Random Forest': RandomForestClassifier(random_state=42),
-        'XGBoost': XGBClassifier(random_state=42, eval_metric='mlogloss', num_class=len(unique_classes))
-        #'SVM': SVC(probability=True, random_state=42)
+        'XGBoost': XGBClassifier(random_state=42, eval_metric='mlogloss', num_class=len(unique_classes)),
+        'SVM': SVC(probability=True, random_state=42)
     }
     
-    # Definir rótulos para a matriz de confusão
-    rotulos = [k for k, v in sorted(mapeamento_grades.items(), key=lambda x: x[1])]
-    
     resultados = {}
+    melhores_parametros = {}
     
     for nome, modelo in modelos.items():
         print(f"  Treinando modelo {nome}...")
@@ -187,28 +160,31 @@ def treinar_e_avaliar_modelos(X, y, mapeamento_grades, caminho_salvar='graficos/
             param_grid = {
                 'n_estimators': [100, 200, 300],
                 'max_depth': [10, 20, 30, None],
-                'min_samples_split': [2, 5, 10],
-                'min_samples_leaf': [1, 2, 4]
+                'min_samples_split': [2, 5],
+                'min_samples_leaf': [1, 2]
             }
         elif nome == 'XGBoost':
             param_grid = {
                 'n_estimators': [100, 200, 300],
-                'learning_rate': [0.01, 0.05, 0.1, 0.2],
+                'learning_rate': [0.01, 0.1, 0.3],
                 'max_depth': [3, 6, 9],
-                'subsample': [0.7, 0.8, 1.0]
+                'subsample': [0.8, 1.0],
+                'colsample_bytree': [0.8, 1.0]
             }
-        else:
+        else:  # SVM
             param_grid = {
                 'C': [0.1, 1, 10, 100],
-                'gamma': ['scale', 'auto', 0.001, 0.01],
+                'gamma': ['scale', 'auto', 0.1, 1],
                 'kernel': ['rbf', 'linear']
             }
         
         grid_search = GridSearchCV(modelo, param_grid, cv=5, scoring='accuracy', n_jobs=-1)
         grid_search.fit(X_train, y_train)
         
-        # Melhor modelo
+        # Melhor modelo e parâmetros
         melhor_modelo = grid_search.best_estimator_
+        melhores_parametros[nome] = grid_search.best_params_
+        print(f"  Melhores parâmetros para {nome}: {grid_search.best_params_}")
         
         # Previsões
         print(f"  Fazendo previsões com {nome}...")
@@ -242,16 +218,18 @@ def treinar_e_avaliar_modelos(X, y, mapeamento_grades, caminho_salvar='graficos/
             'cv_std': np.std(scores)
         }
         
-        # Visualizar matriz de confusão com rótulos das notas
+        # Visualizar matriz de confusão
         print(f"  Gerando matriz de confusão para {nome}...")
         plt.figure(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=rotulos, yticklabels=rotulos)
+        # Criar lista de rótulos na ordem correta (0=D, 1=C, 2=B, 3=A)
+        labels = [k for k, v in sorted(mapeamento_grades.items(), key=lambda x: x[1])]
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels)
         plt.title(f'Matriz de Confusão - {nome}')
         plt.xlabel('Previsto')
-        plt.ylabel('Verdadeiro')
-        plt.savefig(f'{caminho_salvar}matriz_confusao_{nome.lower().replace(" ", "_")}.png')
+        plt.ylabel('Real')
+        plt.savefig(f'{caminho_salvar}matriz_confusao_{nome.lower().replace(" ", "_")}_refinado.png')
         plt.close()
-        print(f"  Matriz de confusão salva como 'matriz_confusao_{nome.lower().replace(' ', '_')}.png'.")
+        print(f"  Matriz de confusão salva como 'matriz_confusao_{nome.lower().replace(' ', '_')}_refinado.png'.")
     
     # Gerar tabela de métricas
     print("  Gerando tabela de métricas...")
@@ -271,12 +249,16 @@ def treinar_e_avaliar_modelos(X, y, mapeamento_grades, caminho_salvar='graficos/
     tabela_metricas = tabela_metricas.round(4)
     
     # Exibir tabela no terminal
-    print("\nTabela de Métricas dos Modelos:")
+    print("\nTabela de Métricas dos Modelos (Refinada):")
     print(tabela_metricas.to_string(index=False))
     
     # Salvar tabela como CSV
-    tabela_metricas.to_csv('metricas_modelos.csv', index=False)
-    print("Tabela de métricas salva em 'metricas_modelos.csv'.")
+    tabela_metricas.to_csv('metricas_modelos_refinadas_refinado.csv', index=False)
+    print("Tabela de métricas salva em 'metricas_modelos_refinadas_refinado.csv'.")
+    
+    # Salvar melhores parâmetros
+    pd.DataFrame(melhores_parametros).to_csv('melhores_parametros_refinado.csv', index=False)
+    print("Melhores parâmetros salvos em 'melhores_parametros_refinado.csv'.")
     
     print("Treinamento e avaliação dos modelos concluídos.")
     return resultados, X_train, X_test, y_train, y_test
@@ -337,10 +319,7 @@ def prever_nota_final(age, study_hours, online_courses, assignment_completion,
     }
     
     df_entrada = pd.DataFrame([dados_entrada])
-    colunas_numericas_entrada = ['Age', 'Study_Hours_per_Week', 'Online_Courses_Completed', 
-                                'Assignment_Completion_Rate (%)', 'Attendance_Rate (%)', 
-                                'Time_Spent_on_Social_Media (hours/week)', 'Sleep_Hours_per_Night']
-    df_entrada[colunas_numericas_entrada] = scaler.transform(df_entrada[colunas_numericas_entrada])
+    df_entrada[colunas_numericas] = scaler.transform(df_entrada[colunas_numericas])
     
     modelo = resultados['Random Forest']['modelo']
     predicao = modelo.predict(df_entrada)[0]
@@ -373,8 +352,8 @@ def main():
     # Gerar estatísticas descritivas
     estatisticas = estatisticas_descritivas(df)
     print("Salvando estatísticas descritivas...")
-    estatisticas.to_csv('estatisticas_descritivas.csv')
-    print("Estatísticas descritivas salvas em 'estatisticas_descritivas.csv'.")
+    estatisticas.to_csv('estatisticas_descritivas_refinado.csv')
+    print("Estatísticas descritivas salvas em 'estatisticas_descritivas_refinado.csv'.")
     
     # Gerar visualizações
     gerar_visualizacoes(df_viz)

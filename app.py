@@ -16,6 +16,24 @@ from scipy.stats import ttest_rel
 import warnings
 warnings.filterwarnings('ignore')
 
+# Dicionário para traduzir variáveis para o português
+TRADUCOES = {
+    'Age': 'Idade',
+    'Study_Hours_per_Week': 'Horas de Estudo por Semana',
+    'Online_Courses_Completed': 'Cursos Online Concluídos',
+    'Assignment_Completion_Rate (%)': 'Taxa de Conclusão de Tarefas (%)',
+    'Exam_Score (%)': 'Pontuação em Exames (%)',
+    'Attendance_Rate (%)': 'Taxa de Presença (%)',
+    'Time_Spent_on_Social_Media (hours/week)': 'Tempo em Redes Sociais (horas/semana)',
+    'Sleep_Hours_per_Night': 'Horas de Sono por Noite',
+    'Preferred_Learning_Style': 'Estilo de Aprendizado Preferido',
+    'Final_Grade': 'Nota Final',
+    'Auditory': 'Auditivo',
+    'Kinesthetic': 'Cinesio',
+    'Reading/Writing': 'Leitura/Escrita',
+    'Visual': 'Visual'
+}
+
 # Função para carregar e pré-processar os dados
 def carregar_e_preprocessar_dados(caminho_arquivo):
     print("Iniciando carregamento e pré-processamento dos dados...")
@@ -61,7 +79,7 @@ def estatisticas_descritivas(df):
     print("Estatísticas descritivas geradas.")
     return estatisticas
 
-# Função para gerar visualizações
+# Função para gerar visualizações com variáveis traduzidas
 def gerar_visualizacoes(df_viz, caminho_salvar='graficos/'):
     print("Iniciando geração de visualizações...")
     # Criar o diretório 'graficos' se não existir
@@ -76,30 +94,39 @@ def gerar_visualizacoes(df_viz, caminho_salvar='graficos/'):
     
     # Gerar histogramas para todas as variáveis numéricas
     for coluna in colunas_numericas:
-        print(f"  Gerando histograma para {coluna}...")
+        print(f"  Gerando histograma para {TRADUCOES[coluna]}...")
         plt.figure(figsize=(10, 6))
         sns.histplot(df_viz[coluna], kde=True)
-        plt.title(f'Distribuição de {coluna}')
-        # Substituir caracteres inválidos no nome do arquivo
+        plt.title(f'Distribuição de {TRADUCOES[coluna]}')
+        plt.xlabel(TRADUCOES[coluna])
+        # Substituir caracteres inválidos no nome do arquivo (mantendo nome em inglês para consistência)
         nome_arquivo = coluna.replace(' (%)', '').replace(' (hours/week)', '').replace('/', '_').lower()
         plt.savefig(f'{caminho_salvar}hist_{nome_arquivo}.png')
         plt.close()
         print(f"  Histograma salvo como 'hist_{nome_arquivo}.png'.")
     
     # Countplot de Preferred_Learning_Style por Final_Grade
-    print("  Gerando countplot de Preferred_Learning_Style por Final_Grade...")
+    print(f"  Gerando countplot de {TRADUCOES['Preferred_Learning_Style']} por {TRADUCOES['Final_Grade']}...")
     plt.figure(figsize=(10, 6))
-    sns.countplot(x='Preferred_Learning_Style', hue='Final_Grade', data=df_viz)
-    plt.title('Nota Final por Estilo de Aprendizado')
+    # Traduzir os valores de Preferred_Learning_Style para exibição
+    df_viz_temp = df_viz.copy()
+    df_viz_temp['Preferred_Learning_Style'] = df_viz_temp['Preferred_Learning_Style'].map(TRADUCOES)
+    sns.countplot(x='Preferred_Learning_Style', hue='Final_Grade', data=df_viz_temp)
+    plt.title(f'{TRADUCOES["Final_Grade"]} por {TRADUCOES["Preferred_Learning_Style"]}')
+    plt.xlabel(TRADUCOES['Preferred_Learning_Style'])
+    plt.ylabel('Contagem')
+    plt.legend(title=TRADUCOES['Final_Grade'])
     plt.savefig(f'{caminho_salvar}bar_learning_style.png')
     plt.close()
     print("  Countplot salvo como 'bar_learning_style.png'.")
     
     # Boxplot de Exam_Score por Final_Grade
-    print("  Gerando boxplot de Exam_Score por Final_Grade...")
+    print(f"  Gerando boxplot de {TRADUCOES['Exam_Score (%)']} por {TRADUCOES['Final_Grade']}...")
     plt.figure(figsize=(10, 6))
     sns.boxplot(x='Final_Grade', y='Exam_Score (%)', data=df_viz)
-    plt.title('Pontuação em Exames por Nota Final')
+    plt.title(f'{TRADUCOES["Exam_Score (%)"]} por {TRADUCOES["Final_Grade"]}')
+    plt.xlabel(TRADUCOES['Final_Grade'])
+    plt.ylabel(TRADUCOES['Exam_Score (%)'])
     plt.savefig(f'{caminho_salvar}box_exam_score_grade.png')
     plt.close()
     print("  Boxplot salvo como 'box_exam_score_grade.png'.")
@@ -108,17 +135,21 @@ def gerar_visualizacoes(df_viz, caminho_salvar='graficos/'):
     print("  Gerando heatmap de correlação...")
     plt.figure(figsize=(12, 8))
     corr = df_viz[['Age', 'Study_Hours_per_Week', 'Exam_Score (%)', 'Attendance_Rate (%)']].corr()
-    sns.heatmap(corr, annot=True, cmap='coolwarm')
+    sns.heatmap(corr, annot=True, cmap='coolwarm', xticklabels=[TRADUCOES[col] for col in corr.columns], 
+                yticklabels=[TRADUCOES[col] for col in corr.columns])
     plt.title('Matriz de Correlação')
     plt.savefig(f'{caminho_salvar}heatmap_corr.png')
     plt.close()
     print("  Heatmap salvo como 'heatmap_corr.png'.")
     
     # Gráfico de dispersão: Exam_Score vs Study_Hours_per_Week
-    print("  Gerando scatterplot de Exam_Score vs Study_Hours_per_Week...")
+    print(f"  Gerando scatterplot de {TRADUCOES['Exam_Score (%)']} vs {TRADUCOES['Study_Hours_per_Week']}...")
     plt.figure(figsize=(10, 6))
     sns.scatterplot(x='Study_Hours_per_Week', y='Exam_Score (%)', hue='Final_Grade', data=df_viz)
-    plt.title('Pontuação em Exames vs. Horas de Estudo por Semana')
+    plt.title(f'{TRADUCOES["Exam_Score (%)"]} vs. {TRADUCOES["Study_Hours_per_Week"]}')
+    plt.xlabel(TRADUCOES['Study_Hours_per_Week'])
+    plt.ylabel(TRADUCOES['Exam_Score (%)'])
+    plt.legend(title=TRADUCOES['Final_Grade'])
     plt.savefig(f'{caminho_salvar}scatter_exam_score_study_hours.png')
     plt.close()
     print("  Scatterplot salvo como 'scatter_exam_score_study_hours.png'.")
@@ -128,8 +159,7 @@ def gerar_visualizacoes(df_viz, caminho_salvar='graficos/'):
     print("Geração de visualizações concluída.")
 
 # Função para treinar e avaliar modelos
-def treinar_e_avaliar_modelos(X, y, caminho_salvar='graficos/'):
-    
+def treinar_e_avaliar_modelos(X, y, mapeamento_grades, caminho_salvar='graficos/'):
     print("Iniciando treinamento e avaliação dos modelos...")
     # Verificar valores únicos de y
     unique_classes = np.unique(y)
@@ -197,8 +227,12 @@ def treinar_e_avaliar_modelos(X, y, caminho_salvar='graficos/'):
         # Visualizar matriz de confusão
         print(f"  Gerando matriz de confusão para {nome}...")
         plt.figure(figsize=(8, 6))
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+        # Criar lista de rótulos na ordem correta (0=D, 1=C, 2=B, 3=A)
+        labels = [k for k, v in sorted(mapeamento_grades.items(), key=lambda x: x[1])]
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels)
         plt.title(f'Matriz de Confusão - {nome}')
+        plt.xlabel('Previsto')
+        plt.ylabel('Real')
         plt.savefig(f'{caminho_salvar}matriz_confusao_{nome.lower().replace(" ", "_")}.png')
         plt.close()
         print(f"  Matriz de confusão salva como 'matriz_confusao_{nome.lower().replace(' ', '_')}.png'.")
@@ -334,7 +368,7 @@ def main():
     print("Dados preparados.")
     
     # Treinar e avaliar modelos
-    resultados, X_train, X_test, y_train, y_test = treinar_e_avaliar_modelos(X, y)
+    resultados, X_train, X_test, y_train, y_test = treinar_e_avaliar_modelos(X, y, mapeamento_grades)
     
     # Teste de hipóteses
     print("Executando testes de hipóteses para comparar modelos...")
